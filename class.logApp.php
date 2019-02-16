@@ -359,7 +359,7 @@ these can be turned ON or OFF changin the class properties:
 Also we can add others or adequate the class to our needs, 
 
 for add logs ON/OFF functionality just add new boolean property.
-e.g. 
+example 
 
 public static  $logName = true;
 
@@ -372,6 +372,15 @@ logApp::name("message"); // it will save in file
 but if  $logName = false;
 
 logApp::name("message"); // it will NOT save in file
+
+
+
+roration log files:
+
+wen a log file reaches the logApp::logMaxSize the class renames it to 'old-logName.log'.
+if the file 'old-' exist is deleted automatically. so only we going to have maximum 2 files
+
+
 
 */
 
