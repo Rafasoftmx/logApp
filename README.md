@@ -22,7 +22,7 @@ Simple static class to handle logging files
 - **logAlert**: boolean
 - **logEmergency**: boolean
 
-- **permissions**: dir or file access permissions used when creates. defaul 0755
+- **permissions**: dir or file access permissions used when creates. default 0755
 ```
     0600 -Read and write for owner, nothing for everybody else
     0644 -Read and write for owner, read for everybody else
