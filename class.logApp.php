@@ -259,24 +259,30 @@ class logApp
 		
 		if( $enabled !== null )
 		{			
-			if($enabled == true)
+			if($enabled === true)
 			{
+				$title = "";
 				$message = "";
 				$debug_backtrace = null;
 				
 				if(array_key_exists (0,$arguments))
 				{
-					$message = $arguments[0];
+					$title = $arguments[0];
 				}
 				
 				if(array_key_exists (1,$arguments))
 				{
-					$debug_backtrace = $arguments[1];
+					$message = $arguments[1];
+				}
+				
+				if(array_key_exists (3,$arguments))
+				{
+					$debug_backtrace = $arguments[3];
 				}
 
 				if($message != "")
 				{
-					logApp::writeMessage($message,$name.".log",$debug_backtrace); 	
+					logApp::writeMessage($title,$message,$name.".log",$debug_backtrace); 	
 				}
 				
 			}
@@ -369,11 +375,11 @@ public static  $name = true;
 
 and we call:
 
-logApp::name("message"); // it will save in file
+logApp::name("title","message"); // it will save in file
 
 but if  $name = false;
 
-logApp::name("message"); // it will NOT save in file
+logApp::name("title","message"); // it will NOT save in file
 
 
 

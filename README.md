@@ -77,11 +77,11 @@ example:
 
 and we call:
 
-    logApp::name("message"); // it will save in file
+    logApp::name("title","message"); // it will save in file
 
 but if  $name = **false**;
 
-    logApp::name("message"); // it will NOT save in file
+    logApp::name("title","message"); // it will NOT save in file
 
 
 ### roration log files
