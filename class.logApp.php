@@ -34,21 +34,22 @@ class logApp
 	public static  $logDir = "logs/";// directory path where le logs going to be storage
 	public static  $logMaxSize = ((1024*1024)*10); //max file size of log. Size in bytes (1Mb = 1024 * 1024);
 	
-	public static  $logPrint = true;// if true, prints all messages send to the logs
+	public static  $logPrint = false;// if true, prints all messages send to the logs
 	
 	// if true, saves a messages in .log from debug, Info, Notice... Emergency methods
-	public static  $logDebug = true;
-	public static  $logInfo = true;
-	public static  $logNotice = true;
-	public static  $logWarning = true;
-	public static  $logError = true;
-	public static  $logCritical = true;
-	public static  $logAlert = true;
-	public static  $logEmergency = true;	
+	public static  $debug = true;
+	public static  $info = true;
+	public static  $notice = true;
+	public static  $warning = true;
+	public static  $error = true;
+	public static  $critical = true;
+	public static  $alert = true;
+	public static  $emergency = true;	
 	
 	
 	
 	public static  $permissions = 0755; // dir or file access permissions used when creates
+	//0755 -Everything for owner, read and execute for everybody else
 	//0600 -Read and write for owner, nothing for everybody else
 	//0644 -Read and write for owner, read for everybody else
 	//0755 -Everything for owner, read and execute for others
@@ -181,7 +182,7 @@ class logApp
 	 * @param array $debug_backtrace
 	 *
 	 */
-   private static function formatMessage($message,$debug_backtrace = NULL) {	   
+   private static function formatMessage($title,$message,$debug_backtrace = NULL) {	   
 
    	   //check directory, else we create them
 		if(!is_dir(self::$logDir))
@@ -197,24 +198,26 @@ class logApp
 	   
 	   	$infotrace = logApp::trace($debug_backtrace); //get formatted string from debug_backtrace array
 	    $msg = "";
-	   	$title = "█ " . date("d-m-Y H:i:s") . ' - ' . $message . " █";
+	   	$title = "█ " . date("d-m-Y H:i:s") . ' - ' . $title . " █";
 	   
 	    $msg .= str_repeat("█",strlen($title)-4 ) . PHP_EOL;
 	   	$msg .= $title . PHP_EOL;
 	    $msg .= str_repeat("█",strlen($title) -4 ) . PHP_EOL;
+	    $msg .= $message . PHP_EOL;
 	    $msg .= logApp::trace($debug_backtrace);
 	   	$msg .= PHP_EOL. PHP_EOL;
 
 	   	
 		if(self::$logPrint) // if print is enabled
 		{
-			echo "<hr/>".$message."<br/>";
+			echo "<hr/>".$title."<br/>";
 			print "<pre>";
+			print $message . PHP_EOL;
 			print_r($infotrace);
 			print "</pre>";
 		}
 	   
-	   return $msg ;
+	   return $msg;
    }//EOF
 
 
@@ -229,9 +232,9 @@ class logApp
 	 * @param string $file
 	 * @param array debug_backtrace
 	 */
-   private static function writeMessage($message,$file = "",$debug_backtrace = NULL) 
+   private static function writeMessage($title,$message,$file = "",$debug_backtrace = NULL) 
    {
-    	error_log(logApp::formatMessage($message,$debug_backtrace) , 3, self::$logDir .$file);
+    	error_log(logApp::formatMessage($title,$message,$debug_backtrace) , 3, self::$logDir .$file);
    }//EOF
 	
 	
@@ -248,17 +251,11 @@ class logApp
     public static function __callStatic($name, $arguments)
     {
 		$enabled = null;
-		if( property_exists(static::class, "log".ucfirst($name) ) )//concatenate to check if exist property in class "logName"
+		if( property_exists(static::class, $name ) )//concatenate to check if exist property in class "name"
 		{
-			$propertyEnabled = "log".ucfirst($name);
-			$enabled = self::${$propertyEnabled}; // get the value
+			$enabled = self::${$name}; // get the value
 		}
-		else if( property_exists(static::class, "log".$name ) ) //concatenate to check if exist property in class "logname"
-		{
-			$propertyEnabled = "log".$name;
-			$enabled = self::${$propertyEnabled}; // get the value
-		}
-		
+
 		
 		if( $enabled !== null )
 		{			
@@ -287,22 +284,27 @@ class logApp
 		}
 		else
 		{
+			$title = "";
 			$message = "";
 			$debug_backtrace = null;
-
+			
 			if(array_key_exists (0,$arguments))
 			{
-				$message = $arguments[0];
+				$title = $arguments[0];
 			}
-
 			if(array_key_exists (1,$arguments))
 			{
-				$debug_backtrace = $arguments[1];
+				$message = $arguments[1];
+			}
+
+			if(array_key_exists (2,$arguments))
+			{
+				$debug_backtrace = $arguments[2];
 			}
 
 			if($message != "")
 			{
-				logApp::writeMessage($message,$name.".log",$debug_backtrace); 	
+				logApp::writeMessage($title,$message,$name.".log",$debug_backtrace); 	
 			}
 				
 		}
@@ -317,12 +319,13 @@ class logApp
 										Examples
 ----------------------------------------------------------------------------------------
 
-The static class can create a file log just callin logApp::NameOfLogFile("message",debug_backtrace());
+The static class can create a file log just callin logApp::NameOfLogFile("title","message",debug_backtrace());
 
 the parameters we need to use are:
 
-1. message: short string message to describe the reason of the logging.
-2. debug_backtrace: the result of the debug_backtrace() function. (optional) http://php.net/manual/en/function.debug-backtrace.php
+1. title: short string title to describe the logging.
+2. message: string message of the reason of the logging.
+3. debug_backtrace: the result of the debug_backtrace() function. (optional) http://php.net/manual/en/function.debug-backtrace.php
 
 
 we can create many logs as we want, all of them is going to be saved in logApp::logDir.
@@ -330,7 +333,7 @@ we can create many logs as we want, all of them is going to be saved in logApp::
 
 example:
 
-logApp::debug("message",debug_backtrace());
+logApp::debug("title","message",debug_backtrace());
 
 
 
@@ -347,29 +350,28 @@ we can use the predefined logs:
 
 these can be turned ON or OFF changin the class properties:
 
-	public static  $logDebug = true;
-	public static  $logInfo = true;
-	public static  $logNotice = true;
-	public static  $logWarning = true;
-	public static  $logError = true;
-	public static  $logCritical = true;
-	public static  $logAlert = true;
-	public static  $logEmergency = true;
+	public static  $debug = true;
+	public static  $info = true;
+	public static  $notice = true;
+	public static  $warning = true;
+	public static  $error = true;
+	public static  $critical = true;
+	public static  $alert = true;
+	public static  $emergency = true;
 	
 Also we can add others or adequate the class to our needs, 
 
 for add logs ON/OFF functionality just add new boolean property.
 example 
 
-public static  $logName = true;
+public static  $name = true;
 
-for that begin with 'log' and the name of our log, it can be capitalized: $logName or not: $logname
 
 and we call:
 
 logApp::name("message"); // it will save in file
 
-but if  $logName = false;
+but if  $name = false;
 
 logApp::name("message"); // it will NOT save in file
 
@@ -384,7 +386,6 @@ if the file 'old-' exist is deleted automatically. so only we going to have maxi
 
 */
 
-logApp::RafA("message",debug_backtrace());
-
+logApp::NameOfLogFile("title","message",debug_backtrace());
 
 ?>
