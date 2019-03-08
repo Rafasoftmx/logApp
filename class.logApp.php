@@ -385,7 +385,4 @@ if the file 'old-' exist is deleted automatically. so only we going to have maxi
 
 
 */
-
-logApp::NameOfLogFile("title","message",debug_backtrace());
-
 ?>
